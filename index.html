@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>AI 英语45分 (VOA 智能分级版)</title>
+    <title>AI 英语45分 (VOA & 生活场景版)</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="英语45分">
@@ -17,7 +17,8 @@
         .btn:active { background: #4338CA; }
         .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
         .tag { display: inline-block; background: #EEF2FF; color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; }
-        .sentence { font-size: 17px; line-height: 1.6; background: #F9FAFB; padding: 14px; border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; margin: 12px 0; white-space: pre-wrap; }
+        .sentence { font-size: 16px; line-height: 1.6; background: #F9FAFB; padding: 14px; border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; margin: 12px 0; white-space: pre-wrap; }
+        .dialogue-box { background: #F0FDF4; border-left: 4px solid #16A34A; padding: 14px; border-radius: 0 8px 8px 0; font-size: 15px; line-height: 1.7; margin: 12px 0; white-space: pre-wrap; }
         .quiz-opt { display: block; width: 100%; text-align: left; background: #F9FAFB; border: 1px solid #E5E7EB; padding: 14px; margin: 10px 0; border-radius: 10px; cursor: pointer; }
         .quiz-opt:active { background: #EEF2FF; border-color: var(--primary); }
         .hidden { display: none; }
@@ -27,7 +28,7 @@
 <body>
     <div class="header">
         <h2 style="margin:0;">AI 英语45分</h2>
-        <p style="margin:6px 0 0; font-size:14px; opacity:0.9;">VOA Learning English 分级智能生成助手</p>
+        <p style="margin:6px 0 0; font-size:14px; opacity:0.9;">VOA 分级精听 + 10分钟生活场景实战</p>
     </div>
     <div class="container">
         <!-- 连续打卡与 API 设置卡片 -->
@@ -40,62 +41,84 @@
                 <button class="btn btn-outline" style="width:auto; padding:6px 12px; font-size:12px;" onclick="startAssessment()">重新测评</button>
             </div>
             <details style="margin-top: 12px; font-size: 12px; color: #6B7280;">
-                <summary style="cursor:pointer;">⚙️ API 配置 (推荐使用 DeepSeek，留空使用内置VOA经典库)</summary>
-                <input type="password" id="api-key-input" class="api-input" placeholder="输入 sk-xxxx 密钥，此处内容安全保存在你手机本地" onchange="saveApiKey()">
+                <summary style="cursor:pointer;">⚙️ API 配置 (DeepSeek Key 自动保存在本地)</summary>
+                <input type="password" id="api-key-input" class="api-input" placeholder="输入 sk-xxxx 密钥" onchange="saveApiKey()">
             </details>
         </div>
+
         <!-- 测评模块 -->
         <div id="assessment-card" class="card hidden">
             <h3>🎯 快速测评 (CEFR适配)</h3>
-            <p style="color:#6B7280; font-size:14px;">请回答以下题目，系统将评估你的等级以便推送适配精听文本：</p>
+            <p style="color:#6B7280; font-size:14px;">请回答以下题目，评估适配等级：</p>
             <div id="quiz-box"><p id="quiz-q" style="font-weight:600;"></p><div id="quiz-options"></div></div>
         </div>
+
         <!-- 每日 45 分钟学习主区域 -->
         <div id="learning-card" class="card hidden">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>📅 今日 45 分钟学习计划 (VOA风格)</h3>
+                <h3>📅 今日学习计划</h3>
                 <button class="btn" style="width:auto; padding:6px 12px; font-size:12px;" onclick="generateDailyContent()">🤖 生成新内容</button>
             </div>
             <hr style="border:none; border-top:1px solid #E5E7EB; margin: 16px 0;">
-            <div style="margin-bottom: 24px;">
-                <span class="tag">01 VOA新闻精听 (15Min)</span>
+            
+            <div style="margin-bottom: 20px;">
+                <span class="tag">01 VOA新闻精听 (12Min)</span>
                 <p id="listening-text" class="sentence"></p>
-                <button class="btn btn-outline" onclick="speakText('listening-text')">🔊 播放慢速标准朗读 (TTS)</button>
+                <button class="btn btn-outline" onclick="speakText('listening-text')">🔊 播放慢速朗读 (TTS)</button>
             </div>
-            <div style="margin-bottom: 24px;">
-                <span class="tag">02 VOA科普阅读 (15Min)</span>
+
+            <div style="margin-bottom: 20px;">
+                <span class="tag">02 VOA科普阅读 (13Min)</span>
                 <p id="reading-text" class="sentence"></p>
                 <button class="btn btn-outline" onclick="speakText('reading-text')">🔊 朗读阅读文章</button>
             </div>
-            <div style="margin-bottom: 24px;">
-                <span class="tag">03 影子金句跟读 (10Min)</span>
-                <p id="shadowing-text" class="sentence"></p>
-                <button class="btn btn-outline" onclick="speakText('shadowing-text')">🎙️ 朗读跟读示范</button>
+
+            <div style="margin-bottom: 20px;">
+                <span class="tag" style="background:#DCFCE7; color:#15803D;">03 生活场景对话 (10Min) ☕</span>
+                <p id="dialogue-text" class="dialogue-box"></p>
+                <button class="btn btn-outline" style="border-color:#16A34A; color:#16A34A;" onclick="speakText('dialogue-text')">🗣️ 播放场景对话朗读</button>
             </div>
+
+            <div style="margin-bottom: 20px;">
+                <span class="tag">04 影子金句跟读 (5Min)</span>
+                <p id="shadowing-text" class="sentence"></p>
+                <button class="btn btn-outline" onclick="speakText('shadowing-text')">🎙️ 朗读示范金句</button>
+            </div>
+
             <div>
-                <span class="tag">04 习惯打卡 (5Min)</span>
+                <span class="tag">05 打卡记录 (5Min)</span>
                 <button class="btn" style="margin-top:12px; font-size:16px;" onclick="doCheckIn()">✅ 完成今日学习打卡</button>
             </div>
         </div>
     </div>
+
     <script>
-        // 状态与数据管理（本地存储持久化）
         let userLevel = localStorage.getItem('user_level') || null;
         let streak = parseInt(localStorage.getItem('streak') || '0');
         let apiKey = localStorage.getItem('api_key') || '';
         let currentQuestion = 0; let score = 0;
-        // 评测题库 (CEFR适配)
+
         const questions = [
             {q: "1. Select the correct word: 'Every day, she _____ a cup of green tea.'", opts: ["A. drink", "B. drinks", "C. drinking", "D. drank"], ans: 1},
             {q: "2. The synonyms of 'Crucial' in Beginner English are:", opts: ["A. Small", "B. Very Important", "C. Easy", "D. Fast"], ans: 1},
             {q: "3. Complete: 'TECHNOLOGY has significantly altered _____.'", opts: ["A. communication", "B. communicating", "C. communications", "D. communicated"], ans: 0}
         ];
-        // 本地离线VOA精选库（无API时备用）
+
         const contentDB = {
-            "L1": { listening: "VOA news: Today, a quiet neighborhood is celebrated. A small town is using clean energy for the first time. The town's mayor said, 'It is good.'", reading: "A young person decided to form a small book club. They started with three friends. Now, ten people read and talk about simple stories every week.", shadowing: "Even a small daily effort repeated often leads to great success." },
-            "L2": { listening: "VOA standard: A complex technology is helping farmers in dry areas access water. This system uses solar power to pump water. It has changed how small communities grow food.", reading: "Effective language acquisition relies on continuous comprehensive input. Engaging with material slightly above your current competence rewire your brain for a second language.", shadowing: "To acquire a language, you must engage with it consistently and with comprehensive input." }
+            "L1": { 
+                listening: "VOA news: A small town uses clean energy for the first time. The town's mayor said, 'It is good for our environment.'", 
+                reading: "A young person started a reading club with friends. Now, ten people meet weekly to discuss simple books.", 
+                dialogue: "Scene: Ordering Coffee\nA: Hello! What can I get for you today?\nB: Hi! I would like a small iced coffee, please.\nA: Sure! Anything else to eat?\nB: Just a blueberry muffin, thanks.",
+                shadowing: "Practice makes progress. Every small step counts." 
+            },
+            "L2": { 
+                listening: "VOA standard: Solar power technology helps farmers access water in dry regions, changing how local communities grow food.", 
+                reading: "Language acquisition works best with consistent comprehensible input that matches your level.", 
+                dialogue: "Scene: Asking for Directions\nA: Excuse me, is there a pharmacy near here?\nB: Yes, go straight for two blocks and turn left. It's next to the supermarket.\nA: Great, thank you so much for your help!\nB: You're welcome! Have a nice day.",
+                shadowing: "To acquire a language, practice consistently with comprehensible material." 
+            }
         };
-        // 初始化应用
+
         function initApp() {
             document.getElementById('streak-text').innerText = `连续打卡：${streak} 天`;
             if (apiKey) document.getElementById('api-key-input').value = apiKey;
@@ -103,10 +126,10 @@
                 document.getElementById('user-level-tag').innerText = `当前等级：${userLevel}`;
                 document.getElementById('assessment-card').classList.add('hidden');
                 document.getElementById('learning-card').classList.remove('hidden');
-                generateDailyContent(); // 初始化生成
+                generateDailyContent();
             } else { startAssessment(); }
         }
-        // 测评相关
+
         function startAssessment() { currentQuestion = 0; score = 0; document.getElementById('assessment-card').classList.remove('hidden'); document.getElementById('learning-card').classList.add('hidden'); showQuestion(); }
         function showQuestion() {
             if (currentQuestion >= questions.length) { finishAssessment(); return; }
@@ -116,55 +139,67 @@
         }
         function answerQuiz(idx) { if (idx === questions[currentQuestion].ans) score++; currentQuestion++; showQuestion(); }
         function finishAssessment() {
-            if (score <= 1) userLevel = 'L1 (入門級)';
-            else if (score === 2) userLevel = 'L2 (基礎級)';
-            else userLevel = 'L3 (進階級)';
+            if (score <= 1) userLevel = 'L1 (入门级)';
+            else if (score === 2) userLevel = 'L2 (基础级)';
+            else userLevel = 'L3 (进阶级)';
             localStorage.setItem('user_level', userLevel);
             document.getElementById('user-level-tag').innerText = `当前等级：${userLevel}`;
-            alert(`🎉 测评完成！等级设定为：${userLevel}。系统将适配 VOA 风格内容！`);
             document.getElementById('assessment-card').classList.add('hidden');
             document.getElementById('learning-card').classList.remove('hidden');
             generateDailyContent();
         }
-        // 核心功能：生成每日内容
+
         async function generateDailyContent() {
             let lvlKey = userLevel.startsWith('L1') ? 'L1' : 'L2';
-            // 如果填了 API Key 且等级需要适配，则调用在线大模型 API
-            if (apiKey && (lvlKey === 'L1' || lvlKey === 'L2')) {
-                document.getElementById('listening-text').innerText = "🤖 DeepSeek 正在模仿 VOA 慢速英语生成中...";
-                document.getElementById('reading-text').innerText = "🤖 DeepSeek 正在模仿 VOA 科普阅读生成中...";
-                document.getElementById('shadowing-text').innerText = "🤖 AI正在生成影子金句示范句子...";
+            if (apiKey) {
+                document.getElementById('listening-text').innerText = "🤖 DeepSeek 正在生成 VOA 听力...";
+                document.getElementById('reading-text').innerText = "🤖 DeepSeek 正在生成 VOA 科普...";
+                document.getElementById('dialogue-text').innerText = "🤖 DeepSeek 正在生成 10分钟生活真实场景对话...";
+                document.getElementById('shadowing-text').innerText = "🤖 DeepSeek 正在生成跟读金句...";
                 try {
                     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
                         method: "POST",
                         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
                         body: JSON.stringify({
-                            model: "deepseek-chat", // 使用通用大模型
+                            model: "deepseek-chat",
                             messages: [{
                                 role: "user",
-                                content: `你是一名资深的初学者英语教学专家。请为 CEFR ${userLevel} 等级初学者生成 1 组模仿 **VOA Learning English 风格** 的每日 45 分钟学习文本卡片，要求：听力和阅读短文词汇控制在 1500 个高频词内，句子结构简单清晰，语速慢（~100 wpm），并模仿 VOA 慢速新闻和科普报道的语气。请严格使用纯 JSON 格式返回，格式如下: {"listening":"...VOA慢速听力短稿...","reading":"...VOA科普分级文章...","shadowing":"...影子跟读金句示范句子..."}`
+                                content: `你是一名资深英语教学专家。请为 CEFR ${userLevel} 等级生成 1 套每日学习卡片，包含：
+1. listening: 模仿 VOA 慢速英语风格的短篇听力稿 (约80-100词)
+2. reading: VOA 风格科普阅读 (约100-120词)
+3. dialogue: 1个真实实用生活场景对话 (如咖啡店点餐、超市购物、问路、诊所挂号、租房咨询等，标注Scene，包含角色A/B共 6-8 句对话，地道自然，适合练习10分钟)
+4. shadowing: 1个跟读示范金句
+
+请严格使用纯 JSON 格式返回，格式必须如下（不要包含 markdown 代码块）：
+{"listening":"...","reading":"...","dialogue":"Scene: ...\\nA: ...\\nB: ...","shadowing":"..."}`
                             }]
                         })
                     });
                     const resData = await response.json();
-                    const content = JSON.parse(resData.choices[0].message.content);
+                    let rawStr = resData.choices[0].message.content.trim();
+                    // 兼容处理可能带有的 markdown code block
+                    if (rawStr.startsWith("```json")) rawStr = rawStr.replace(/```json|```/g, "").trim();
+                    const content = JSON.parse(rawStr);
+
                     document.getElementById('listening-text').innerText = content.listening;
                     document.getElementById('reading-text').innerText = content.reading;
+                    document.getElementById('dialogue-text').innerText = content.dialogue;
                     document.getElementById('shadowing-text').innerText = content.shadowing;
                     return;
-                } catch (e) { console.warn("API 调用失败或未响应，自动使用本地 VOA 库示例：", e); }
+                } catch (e) { console.warn("API 调用降级：", e); }
             }
-            // 无API或等级高于L3时，自动从内置离线VOA经典库随机调用一个（这里简化演示只调用一个）
+            // 离线备用
             let data = contentDB[lvlKey];
             document.getElementById('listening-text').innerText = data.listening;
             document.getElementById('reading-text').innerText = data.reading;
+            document.getElementById('dialogue-text').innerText = data.dialogue;
             document.getElementById('shadowing-text').innerText = data.shadowing;
         }
-        // 功能性方法
+
         function saveApiKey() { apiKey = document.getElementById('api-key-input').value.trim(); localStorage.setItem('api_key', apiKey); alert('API 密钥已保存！'); generateDailyContent(); }
-        function speakText(elementId) { let text = document.getElementById(elementId).innerText; speechSynthesis.cancel(); let msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US'; msg.rate = 0.8; speechSynthesis.speak(msg); }
-        function doCheckIn() { streak++; localStorage.setItem('streak', streak); document.getElementById('streak-text').innerText = `连续打卡：${streak} 天`; alert(`🎉 成功打卡！连续打卡天数累计达：${streak} 天，继续坚持！`); }
-        // 启动系统
+        function speakText(elementId) { let text = document.getElementById(elementId).innerText; speechSynthesis.cancel(); let msg = new SpeechSynthesisUtterance(text); msg.lang = 'en-US'; msg.rate = 0.85; speechSynthesis.speak(msg); }
+        function doCheckIn() { streak++; localStorage.setItem('streak', streak); document.getElementById('streak-text').innerText = `连续打卡：${streak} 天`; alert(`🎉 成功打卡！连续天数：${streak} 天！`); }
+
         initApp();
     </script>
 </body>
