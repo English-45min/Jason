@@ -1,1 +1,1 @@
-AI study app
+AI study app 
