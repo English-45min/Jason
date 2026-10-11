@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>AI 英语45分 (网页原生语音输入版)</title>
+    <title>AI 英语45分 (iOS完美适配版)</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="英语45分">
@@ -30,11 +30,6 @@
         .chat-input-row { display: flex; gap: 6px; margin-top: 10px; }
         .chat-input { flex: 1; padding: 8px 12px; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 14px; }
 
-        /* 语音输入按钮样式 */
-        .btn-mic { background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC; width: auto; margin-top: 0; padding: 8px 12px; font-size: 14px; }
-        .btn-mic.recording { background: #FEE2E2; color: #DC2626; border-color: #FCA5A5; animation: pulse 1.2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-
         .api-statusbar { position: fixed; bottom: 0; left: 0; width: 100%; background: #111827; color: #9CA3AF; padding: 10px 16px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 9999; border-top: 1px solid #374151; }
         .api-statusbar span { color: #F3F4F6; font-weight: 600; }
         .refresh-link { color: #818CF8; cursor: pointer; text-decoration: underline; margin-left: 10px; }
@@ -52,7 +47,7 @@
 
     <div class="header">
         <h2 style="margin:0;">AI 英语45分</h2>
-        <p style="margin:6px 0 0; font-size:14px; opacity:0.9;">全功能智能英语学习工作台 (网页原生语音版)</p>
+        <p style="margin:6px 0 0; font-size:14px; opacity:0.9;">全功能智能英语学习工作台</p>
     </div>
 
     <div class="container">
@@ -103,15 +98,13 @@
                 <p id="dialogue-text" class="dialogue-box"></p>
                 <button class="btn btn-outline" style="border-color:#16A34A; color:#16A34A; margin-bottom:8px;" onclick="playDialogueDualVoice()">🎭 智能男女声交替连贯朗读</button>
                 
-                <div style="font-weight:600; font-size:13px; color:#166534; margin-top:8px;">💬 实时口语对练（点击麦克风直接说话）：</div>
+                <div style="font-weight:600; font-size:13px; color:#166534; margin-top:8px;">💬 实时口语对练（点击输入框，用键盘麦克风说话）：</div>
                 <div class="chat-container" id="chat-box">
-                    <div class="chat-msg chat-ai">AI 场景助手已就绪！点击下方 🎙️ 按钮说话即可练习口语！</div>
+                    <div class="chat-msg chat-ai">AI 场景助手已就绪！点击下方输入框，使用键盘自带的麦克风即可语音输入！</div>
                 </div>
                 <div class="chat-input-row">
-                    <input type="text" id="user-chat-input" class="chat-input" placeholder="按 🎙️ 说话或手动输入..." onkeypress="if(event.key==='Enter') sendChat()">
-                    <!-- 原生语音录音按钮 -->
-                    <button class="btn btn-mic" id="mic-btn" onclick="toggleSpeechRecognition()">🎙️ 说话</button>
-                    <button class="btn" style="width:auto; margin-top:0; padding:8px 12px;" onclick="sendChat()">发送</button>
+                    <input type="text" id="user-chat-input" class="chat-input" placeholder="点此输入，点击键盘 🎙️ 语音输入..." onkeypress="if(event.key==='Enter') sendChat()">
+                    <button class="btn" style="width:auto; margin-top:0; padding:8px 16px;" onclick="sendChat()">发送</button>
                 </div>
             </div>
 
@@ -128,7 +121,6 @@
         </div>
     </div>
 
-    <!-- 底部常驻 API 余额监控栏 -->
     <div class="api-statusbar" id="api-statusbar">
         <div>状态: <span id="balance-status">未配置 Key</span></div>
         <div>余额: <span id="balance-amount">--</span> <span class="refresh-link" onclick="checkApiBalance()">🔄 刷新</span></div>
@@ -141,10 +133,6 @@
         let vocabBook = JSON.parse(localStorage.getItem('vocab_book') || '[]');
         let currentQuestion = 0; let score = 0;
         let lastSelectedWord = "";
-        
-        // 语音识别对象定义
-        let recognition = null;
-        let isRecording = false;
 
         const questions = [
             {q: "1. Select the correct word: 'Every day, she _____ a cup of green tea.'", opts: ["A. drink", "B. drinks", "C. drinking", "D. drank"], ans: 1},
@@ -174,73 +162,12 @@
                 checkApiBalance();
             }
             renderVocabBook();
-            initSpeechRecognition(); // 初始化原生语音识别引擎
             if (userLevel) {
                 document.getElementById('user-level-tag').innerText = `当前等级：${userLevel}`;
                 document.getElementById('assessment-card').classList.add('hidden');
                 document.getElementById('learning-card').classList.remove('hidden');
                 generateDailyContent();
             } else { startAssessment(); }
-        }
-
-        // 初始化网页原生 Web Speech 语音识别接口
-        function initSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                console.warn("当前浏览器不支持原生 Web Speech API");
-                return;
-            }
-            recognition = new SpeechRecognition();
-            recognition.lang = 'en-US'; // 强制美式英语识别，倒逼发音准确
-            recognition.continuous = false; // 说话暂停后自动结束识别
-            recognition.interimResults = true; // 实时显示识别中的文本
-
-            recognition.onstart = function() {
-                isRecording = true;
-                const micBtn = document.getElementById('mic-btn');
-                micBtn.innerText = "🛑 正在聆听...";
-                micBtn.classList.add('recording');
-            };
-
-            recognition.onresult = function(event) {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    transcript += event.results[i][0].transcript;
-                }
-                document.getElementById('user-chat-input').value = transcript;
-            };
-
-            recognition.onerror = function(event) {
-                console.error("语音识别错误:", event.error);
-                stopRecording();
-                alert("语音识别失败，请检查麦克风权限或稍后再试。");
-            };
-
-            recognition.onend = function() {
-                stopRecording();
-            };
-        }
-
-        function toggleSpeechRecognition() {
-            if (!recognition) {
-                alert("您的浏览器暂不支持网页原生语音输入，请确保使用的是 Safari / Chrome 浏览器。");
-                return;
-            }
-            if (isRecording) {
-                recognition.stop();
-            } else {
-                document.getElementById('user-chat-input').value = '';
-                recognition.start();
-            }
-        }
-
-        function stopRecording() {
-            isRecording = false;
-            const micBtn = document.getElementById('mic-btn');
-            if (micBtn) {
-                micBtn.innerText = "🎙️ 说话";
-                micBtn.classList.remove('recording');
-            }
         }
 
         async function checkApiBalance() {
@@ -406,7 +333,7 @@ B: ...）
                     document.getElementById('dialogue-text').innerText = content.dialogue;
                     document.getElementById('shadowing-text').innerText = content.shadowing;
                     
-                    document.getElementById('chat-box').innerHTML = `<div class="chat-msg chat-ai">AI 场景助手已就绪！点击下方 🎙️ 说话按钮即可练习口语！</div>`;
+                    document.getElementById('chat-box').innerHTML = `<div class="chat-msg chat-ai">AI 场景助手已就绪！点此输入框并使用键盘自带的 🎙️ 语音输入即可！</div>`;
                     checkApiBalance();
                     return;
                 } catch (e) { console.warn("API 动态生成解析失败：", e); }
@@ -477,7 +404,7 @@ B: ...）
             try {
                 const response = await fetch("[https://api.deepseek.com/v1/chat/completions](https://api.deepseek.com/v1/chat/completions)", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ` + apiKey },
                     body: JSON.stringify({
                         model: "deepseek-chat",
                         messages: [
@@ -493,7 +420,6 @@ B: ...）
                 chatBox.innerHTML += `<div class="chat-msg chat-ai">AI 助手: ${aiReply}</div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
                 
-                // 自动朗读 AI 的回复，形成真实的语音对练体验
                 let msg = new SpeechSynthesisUtterance(aiReply.split('\n')[0]);
                 msg.lang = 'en-US';
                 msg.rate = 0.85;
@@ -505,7 +431,7 @@ B: ...）
             }
         }
 
-        function saveApiKey() { apiKey = document.getElementById('api-key-input').value.trim(); localStorage.setItem('api_key', apiKey); alert('API 密钥已保存！'); checkApiBalance(); generateDailyContent(); }
+        function saveApiKey() { apiKey = document.getElementById('api-key-input'].value.trim(); localStorage.setItem('api_key', apiKey); alert('API 密钥已保存！'); checkApiBalance(); generateDailyContent(); }
         function doCheckIn() { streak++; localStorage.setItem('streak', streak); document.getElementById('streak-text').innerText = `连续打卡：${streak} 天`; alert(`🎉 成功打卡！连续天数：${streak} 天！`); }
 
         initApp();
