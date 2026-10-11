@@ -34,6 +34,9 @@
         .api-statusbar span { color: #F3F4F6; font-weight: 600; }
         .refresh-link { color: #818CF8; cursor: pointer; text-decoration: underline; margin-left: 10px; }
 
+        .quiz-opt { display: block; width: 100%; text-align: left; background: #F9FAFB; border: 1px solid #E5E7EB; padding: 14px; margin: 10px 0; border-radius: 10px; cursor: pointer; }
+        .quiz-opt:active { background: #EEF2FF; border-color: var(--primary); }
+
         .hidden { display: none; }
         .api-input { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #D1D5DB; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
         .vocab-item { background: #F3F4F6; padding: 8px 12px; border-radius: 6px; margin-top: 6px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
@@ -51,6 +54,7 @@
     </div>
 
     <div class="container">
+        <!-- 账号打卡与 API 配置 -->
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
@@ -69,11 +73,13 @@
             </details>
         </div>
 
+        <!-- 测评模块 -->
         <div id="assessment-card" class="card hidden">
             <h3>🎯 快速测评 (CEFR适配)</h3>
             <div id="quiz-box"><p id="quiz-q" style="font-weight:600;"></p><div id="quiz-options"></div></div>
         </div>
 
+        <!-- 学习主区域 -->
         <div id="learning-card" class="card hidden">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>📅 今日学习计划</h3>
@@ -121,6 +127,7 @@
         </div>
     </div>
 
+    <!-- 底部常驻 API 余额监控栏 -->
     <div class="api-statusbar" id="api-statusbar">
         <div>状态: <span id="balance-status">未配置 Key</span></div>
         <div>余额: <span id="balance-amount">--</span> <span class="refresh-link" onclick="checkApiBalance()">🔄 刷新</span></div>
@@ -404,7 +411,7 @@ B: ...）
             try {
                 const response = await fetch("[https://api.deepseek.com/v1/chat/completions](https://api.deepseek.com/v1/chat/completions)", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ` + apiKey },
+                    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
                     body: JSON.stringify({
                         model: "deepseek-chat",
                         messages: [
@@ -431,9 +438,22 @@ B: ...）
             }
         }
 
-        function saveApiKey() { apiKey = document.getElementById('api-key-input'].value.trim(); localStorage.setItem('api_key', apiKey); alert('API 密钥已保存！'); checkApiBalance(); generateDailyContent(); }
-        function doCheckIn() { streak++; localStorage.setItem('streak', streak); document.getElementById('streak-text').innerText = `连续打卡：${streak} 天`; alert(`🎉 成功打卡！连续天数：${streak} 天！`); }
+        function saveApiKey() { 
+            apiKey = document.getElementById('api-key-input').value.trim(); 
+            localStorage.setItem('api_key', apiKey); 
+            alert('API 密钥已保存！'); 
+            checkApiBalance(); 
+            generateDailyContent(); 
+        }
 
+        function doCheckIn() { 
+            streak++; 
+            localStorage.setItem('streak', streak); 
+            document.getElementById('streak-text').innerText = `连续打卡：${streak} 天`; 
+            alert(`🎉 成功打卡！连续天数：${streak} 天！`); 
+        }
+
+        // 初始化运行应用
         initApp();
     </script>
 </body>
