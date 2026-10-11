@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>AI 英语45分 (稳定修复版)</title>
+    <title>AI 英语45分 (接口修复版)</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="英语45分">
@@ -250,7 +250,7 @@
                             method: "POST",
                             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
                             body: JSON.stringify({
-                                model: "deepseek-v4-flash",
+                                model: "deepseek-flash",
                                 messages: [{ role: "user", content: `请简明扼要地解释英文单词或短语 "${text}"。格式要求：音标 [xxx] | 中文释义。字数控制在30字以内。` }]
                             })
                         });
@@ -308,7 +308,7 @@
                         method: "POST",
                         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
                         body: JSON.stringify({
-                            model: "deepseek-v4-flash",
+                            model: "deepseek-flash",
                             messages: [{
                                 role: "user",
                                 content: `你是一名资深英语教学专家。请为 CEFR ${userLevel} 等级生成 1 套每日学习卡片，包含：
@@ -413,18 +413,18 @@ B: ...）
                     method: "POST",
                     headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
                     body: JSON.stringify({
-                        model: "deepseek-v4-flash",
+                        model: "deepseek-flash",
                         messages: [
-                            { role: "system", content: "你是一个英语口语教练和生活场景对话伙伴。请用简单、地道的英文继续对话，并在回复后附带一句简短的中文纠错或地道表达建议。" },
+                            { role: "system", content: "你是一个英语口语教练和生活场景对话伙伴。请用简单、地亮的英文继续对话，并在回复后附带一句简短的中文纠错或地道表达建议。" },
                             { role: "user", content: userText }
                         ]
                     })
                 });
                 
                 const resData = await response.json();
-                document.getElementById('temp-reply').remove();
+                const tempEl = document.getElementById('temp-reply');
+                if (tempEl) tempEl.remove();
                 
-                // 增加安全检查，防止 API 返回错误结构时崩溃
                 if (resData.choices && resData.choices.length > 0) {
                     const aiReply = resData.choices[0].message.content.trim();
                     chatBox.innerHTML += `<div class="chat-msg chat-ai">AI 助手: ${aiReply}</div>`;
@@ -435,15 +435,16 @@ B: ...）
                     msg.rate = 0.85;
                     window.speechSynthesis.speak(msg);
                 } else if (resData.error) {
-                    chatBox.innerHTML += `<div class="chat-msg chat-ai" style="color:red;">AI 错误: ${resData.error.message || '未知错误'}</div>`;
+                    chatBox.innerHTML += `<div class="chat-msg chat-ai" style="color:red;">API 错误: ${resData.error.message}</div>`;
                 } else {
-                    chatBox.innerHTML += `<div class="chat-msg chat-ai" style="color:red;">AI 响应格式异常</div>`;
+                    chatBox.innerHTML += `<div class="chat-msg chat-ai" style="color:red;">返回数据结构异常</div>`;
                 }
 
                 checkApiBalance();
             } catch (err) {
                 const tempEl = document.getElementById('temp-reply');
-                if (tempEl) tempEl.innerText = "网络请求失败，请检查网络或代理。";
+                if (tempEl) tempEl.remove();
+                chatBox.innerHTML += `<div class="chat-msg chat-ai" style="color:red;">网络请求失败，请检查网络连接</div>`;
             }
         }
 
